@@ -33,11 +33,14 @@ app.get('/api/users', (req, res) => {
   res.json(users)
 })
 
+// Object in the format user ID: an array of execrise objects
+logsObj = {}
+
 app.post('/api/users/:_id/exercises', (req, res) => {
   idString = req.body._id
   descriptionString = req.body.description
 
-  //return single user object based on id
+  //return single user object based on id, used for id and username
   user = users.find((user) => user._id === userId);
 
   // duration validation (number)
@@ -46,6 +49,23 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   //date validation (Date() method)
   dateString = new Date(req.body.date)
   dateString = dateString.toDateString()
+
+  //Exercise log
+  exerciseLog = {
+    description: descriptionString,
+    duration: durationNum,
+    date: dateString
+  }
+
+  //Update Object
+  //if id exists, add to array
+  if(logsObj.hasOwnProperty(user._id)) {
+    logsObj[userId].push(exerciseLog)
+  } else {
+    logsObj[userId] = [exerciseLog]
+  }
+  //if id doesnt exist, add to the total object
+
 
   res.json({
     _id: user._id,
@@ -56,14 +76,21 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   })
 })
 
+
 app.get('/api/users/:id/logs', (req, res) => {
   idString = req.params.id
-  
+
+  user = users.find((user) => user._id === userId);
+
+  logsArray = 
+
+  countNum = logsArray.length
+
   res.json({
-    id:,
-    username:,
-    count:,
-    logs:
+    id: idString,
+    username: user.username,
+    count: coutnNum,
+    logs: logsArray
     //array of objects that have description duration and date
   })
 })
