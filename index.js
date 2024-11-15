@@ -41,7 +41,9 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   descriptionString = req.body.description
 
   //return single user object based on id, used for id and username
-  user = users.find((user) => user._id === userId);
+  user = users.find((user) => user._id === idString);
+  userId = user._id
+  userUsername = user.username
 
   // duration validation (number)
   durationNum = Number(req.body.duration)
@@ -58,18 +60,18 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   }
 
   //Update Object
-  //if id exists, add to array
-  if(logsObj.hasOwnProperty(user._id)) {
+  //if id exists, add to array of exerciselogs
+  if(logsObj.hasOwnProperty(userId)) {
     logsObj[userId].push(exerciseLog)
-  } else {
+  } else {//if id doesnt exist create new property(key) with userId
     logsObj[userId] = [exerciseLog]
   }
-  //if id doesnt exist, add to the total object
+  
 
 
   res.json({
-    _id: user._id,
-    username: user.username,
+    _id: userId,
+    username: userUsername,
     date: dateString,
     duration: durationNum,
     description: descriptionString
@@ -82,7 +84,7 @@ app.get('/api/users/:id/logs', (req, res) => {
 
   user = users.find((user) => user._id === userId);
 
-  logsArray = 
+  logsArray = logsObj[idString]
 
   countNum = logsArray.length
 
