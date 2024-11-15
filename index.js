@@ -5,6 +5,9 @@ require('dotenv').config()
 
 app.use(cors())
 app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true })); 
+//added to make the post function work? suggestion 
+//from chatgpt, does actually fix it
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
@@ -14,19 +17,14 @@ users = []
 
 app.post('/api/users', (req, res) => {
   usernameString = req.body.username
-  idString = Math.random.toString(36).substring(2, 22)
-
+  idString = Math.random().toString(36).substring(2, 22)
+  console.log(idString)
   userObject = {
-    _id: idString,
-    username: usernameString
-  }
-  //userObject[id] = usernameString
-  //users.append(userObject)
-
-  res.json({
     username: usernameString,
     _id: idString
-  })
+  }
+
+  res.json(userObject)
 })
 
 app.get('/api/users', (req, res) => {
