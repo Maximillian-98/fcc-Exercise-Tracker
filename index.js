@@ -17,13 +17,12 @@ users = []
 
 app.post('/api/users', (req, res) => {
   usernameString = req.body.username
-  idString = Math.random().toString(36).substring(2, 22)
-  console.log(idString)
+  idString = Math.random().toString(36).substring(2, 22) //not secure
   userObject = {
     username: usernameString,
     _id: idString
   }
-
+  users.push(userObject)
   res.json(userObject)
 })
 
@@ -35,19 +34,31 @@ app.get('/api/users', (req, res) => {
 logsObj = {}
 
 app.post('/api/users/:_id/exercises', (req, res) => {
-  idString = req.body._id
+  idString = req.body[':_id'] //weird naming means .:_id doesnt work
+  //console.log(idString)
   descriptionString = req.body.description
 
   //return single user object based on id, used for id and username
-  user = users.find((user) => user._id === idString);
+  user = users.find((user) => user._id === idString); //error if user id is not present, but not in fcc requirements
+  //console.log(user)
   userId = user._id
+  //console.log(userId)
   userUsername = user.username
 
-  // duration validation (number)
+  //duration validation (number)
   durationNum = Number(req.body.duration)
 
   //date validation (Date() method)
-  dateString = new Date(req.body.date)
+  // also fails to catch incorrect inputs, not required
+  dateinput = req.body.date
+  dateString = ''
+  if(!dateinput) {
+    dateString = new Date()
+  }
+  else {
+    dateString = new Date(req.body.date)
+  }
+  //change to desired format
   dateString = dateString.toDateString()
 
   //Exercise log
@@ -65,8 +76,6 @@ app.post('/api/users/:_id/exercises', (req, res) => {
     logsObj[userId] = [exerciseLog]
   }
   
-
-
   res.json({
     _id: userId,
     username: userUsername,
@@ -77,20 +86,50 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 })
 
 
-app.get('/api/users/:id/logs', (req, res) => {
-  idString = req.params.id
+app.get('/api/users/:_id/logs', (req, res) => {
+  idString = req.params._id
 
-  user = users.find((user) => user._id === userId);
+  user = users.find((user) => user._id === idString);
 
-  logsArray = logsObj[idString]
+  logsArray = logsObj[user._id]
+  //console.log(logsArray)
 
   countNum = logsArray.length
 
+  //query limiters
+  limitsObj = req.query
+  from = limitsObj.from
+  to = limitsObj.to
+  limit = limitsObj.limit
+
+  if(from) {
+    fromDate = new Date(from)
+    fromDate = fromDate.toDateString()
+    if(fromDate) {
+      logsArray = logsArray.filter(log => log.date <= fromDate)
+    } //i feel like these inequalities are the wrong way around
+  } //but the tests i do say otherwise
+  if(to) {
+    toDate = new Date(to)
+    toDate = toDate.toDateString()
+    if(toDate) {
+      logsArray = logsArray.filter(log => log.date >= toDate)
+    }
+  }
+  if(limit) { //0 doesnt work as a limit?
+    exLimit = Number(limit)
+    console.log(exLimit)
+    if(exLimit) {
+      logsArray = logsArray.slice(0,exLimit)
+    }
+  }
+  
+
   res.json({
-    id: idString,
+    _id: idString,
     username: user.username,
-    count: coutnNum,
-    logs: logsArray
+    count: countNum,
+    log: logsArray
     //array of objects that have description duration and date
   })
 })
