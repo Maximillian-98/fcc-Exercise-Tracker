@@ -45,8 +45,17 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   //console.log(userId)
   userUsername = user.username
 
+  //description validation
+  if (!descriptionString) {
+    throw new Error("ValidationError: Exercises validation failed: description: Path `description` is required.");
+  }
+
   //duration validation (number)
-  durationNum = Number(req.body.duration)
+  durationInput = req.body.duration;
+  durationNum = Number(durationInput);
+  if (!durationInput || isNaN(durationNum)) {
+    throw new Error("ValidationError: Exercises validation failed: duration:  Cast to Number failed at path 'duration'");
+  }
 
   //date validation (Date() method)
   // also fails to catch incorrect inputs, not required
@@ -91,8 +100,11 @@ app.get('/api/users/:_id/logs', (req, res) => {
 
   user = users.find((user) => user._id === idString);
 
-  logsArray = logsObj[user._id]
-  //console.log(logsArray)
+  let logsArray = []; // Always start with an empty array
+
+  if (user._id && logsObj[user._id]) {
+    logsArray = logsObj[user._id];
+  }
 
   countNum = logsArray.length
 
