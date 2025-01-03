@@ -127,6 +127,18 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 
 app.get('/api/users/:_id/logs', (req, res) => {
   const _id = req.params._id
+  const { from, to, limit } = req.query;
+
+  //query object
+  let query = { userid: _id };
+
+  //from and to
+  if(from || to) {
+    query.date = {};
+    //from chatGPT, for sorting queries gte greater than or equal to
+    if (from) {query.date.$gte = new Date(from)};
+    if (to) {query.date.$lte = new Date(to)}; 
+  }
 
   //Find user
   User.findById(_id)
@@ -136,9 +148,9 @@ app.get('/api/users/:_id/logs', (req, res) => {
       }
     
       //Find logs of user
-      Log.find({ userid: _id})
+      Log.find(query)
+        .limit(Number(limit) || 0)
         .then(logs => {
-          console.log(logs)
           res.json({
             _id: user._id,
             username: user.username,
